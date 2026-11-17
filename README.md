@@ -1,3 +1,10 @@
+> [!NOTE]
+> Hello! Welcome to my Premier's Coding Competition submission for 2026.
+> 
+> This repository is an archive of my project source code I made for the open platform category. Feel free to look at what I made. Thanks for checking my submission out!
+> 
+> Below is the original README.
+
 <p align="center">
   <img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/22a06755-c0c6-4d8f-8e95-79d8fbc534e8" />
 </p>
