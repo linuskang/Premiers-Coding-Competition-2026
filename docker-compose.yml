@@ -1,0 +1,9 @@
+services:
+  app:
+    image: ghcr.io/linuskang/quacky:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: ${PORT:-5431}
+    ports:
+      - "5431:5431"

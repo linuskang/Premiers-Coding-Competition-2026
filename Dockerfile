@@ -1,0 +1,81 @@
+# Dependencies
+FROM node:26-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN npm install -g pnpm@12.14.0
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* .npmrc* ./
+RUN pnpm install --frozen-lockfile
+
+FROM node:26-alpine AS builder
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN npm install -g pnpm@12.14.0
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+ENV DATABASE_URL="postgresql://localhost:5432/db"
+ENV ORG_NAME="dummy-org"
+ENV VERSION="dummy-version"
+ENV GITHUB_CLIENT_ID="dummy-client-id"
+ENV GITHUB_CLIENT_SECRET="dummy-client-secret"
+ENV UPSTREAM_API_KEY="dummy-upstream-api-key"
+ENV RESEND_API_KEY="dummy-api-key"
+ENV EMAIL_FROM="dummy@example.com"
+ENV BETTER_AUTH_URL="http://localhost:3000"
+ENV RUSTFS_ENDPOINT="https://nuhuh.com"
+ENV AI_URL="https://nolooking.com"
+ENV DESCRIPTION="no"
+ENV RUSTFS_ACCESS_KEY_ID="dummy-access-key"
+ENV RUSTFS_SECRET_ACCESS_KEY="dummy-secret-access-key"
+ENV GOOGLE_CLIENT_ID="dummy-google-client-id"
+ENV GOOGLE_CLIENT_SECRET="dummy-google-client-secret"
+ENV AI_KEY="dummy-ai-key"
+ENV AI_MODEL="dummy-ai-model"
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY="dummy-vapid-public-key"
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+ENV VAPID_PRIVATE_KEY="dummy-vapid-private-key"
+ENV MICROSOFT_CLIENT_ID="dummy-microsoft-client-id"
+ENV MICROSOFT_CLIENT_SECRET="dummy-microsoft-client-secret"
+ENV VAPID_EMAIL="dummy-vapid-email@lkang.au"
+ENV SEQ_INGEST_URL="https://dummy-seq-ingest-url"
+ENV SEQ_API_KEY="dummy-seq-api-key"
+
+RUN pnpm run generate
+RUN pnpm run build
+
+FROM node:26-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--network-family-autoselection-attempt-timeout=500"
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+RUN chown -R nextjs:nodejs /app
+
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/entrypoint.sh ./entrypoint.sh
+RUN sed -i 's/\r$//' ./entrypoint.sh && chmod +x ./entrypoint.sh
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+
+ENTRYPOINT ["./entrypoint.sh"]

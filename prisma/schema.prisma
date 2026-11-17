@@ -1,0 +1,553 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id String @id @default(uuid())
+
+  name          String
+  username      String  @unique
+  email         String  @unique
+  emailVerified Boolean
+  image         String
+  verified      Boolean @default(false)
+
+  statsForNerds Boolean @default(false)
+  private       Boolean @default(false)
+  streamerMode  Boolean @default(false)
+  hideTips      Boolean @default(false)
+
+  bio         String?
+  bannerImage String?
+  pronoun     String?
+  location    String?
+  website     String?
+
+  accessibilityModeEnabled Boolean @default(false)
+  isSimulationAccount     Boolean @default(false)
+  simulationActive        Boolean @default(false)
+  simulationPersona       Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  role       String?
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
+
+  parentEmail String?
+
+  unlockedPosting    Boolean @default(false)
+  unlockedCommenting Boolean @default(false)
+  unlockedDms        Boolean @default(false)
+  unlockedFuzzies    Boolean @default(false)
+  unlockedProfiles   Boolean @default(false)
+
+  fuzzySent     Fuzzy[] @relation("FuzzyAuthor")
+  fuzzyReceived Fuzzy[] @relation("FuzzyReceiver")
+
+  memes     Memeland[] @relation("MemeAuthor")
+  memeVotes MemeVote[]
+
+  xp     Int @default(0)
+  points Int @default(0)
+
+  posts               Post[]
+  simulationRewards   SimulationReportReward[] @relation("SimulationRewardReporter")
+  following           Follow[]             @relation("UserFollowing")
+  followers           Follow[]             @relation("UserFollowers")
+  likes               Like[]
+  comments            Comment[]
+  notifications       Notification[]       @relation("NotificationUser")
+  actorNotifications  Notification[]       @relation("NotificationActor")
+  bookmarks           Bookmark[]
+  postViews           PostView[]
+  sentDms             Dm[]                 @relation("SentMessages")
+  receivedDms         Dm[]                 @relation("ReceivedMessages")
+  sessions            Session[]
+  accounts            Account[]
+  checkIns            CheckIn[]
+  rngEntries          RngEntry[]
+  shorts              Short[]
+  shopItems           ShopItem[]
+  shopSuggestions     ShopSuggestion[]     @relation("ShopSuggestionCreator")
+  shopSuggestionVotes ShopSuggestionVote[]
+  ShopWishlists       ShopWishlist[]
+  shopPurchases       ShopPurchase[]
+  pushSubscriptions   PushSubscription[]
+  pushNotificationsEnabled Boolean @default(true)
+
+  @@map("user")
+}
+
+enum MemeVoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+model Memeland {
+  id        String   @id @default(uuid())
+  authorId  String
+  flagged   Boolean  @default(false)
+  imgUrl    String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  author User       @relation("MemeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  votes  MemeVote[]
+
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model MemeVote {
+  id        String       @id @default(uuid())
+  memeId    String
+  userId    String
+  type      MemeVoteType
+  createdAt DateTime     @default(now()) @db.Timestamptz(3)
+
+  meme Memeland @relation(fields: [memeId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([memeId, userId])
+  @@index([userId])
+  @@index([memeId, type])
+}
+
+model Short {
+  id          String   @id @default(uuid())
+  userId      String
+  description String?
+  flagged     Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  url         String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Fuzzy {
+  id String @id @default(uuid())
+
+  authorId String
+  author   User   @relation("FuzzyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User   @relation("FuzzyReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  message String
+  flagged Boolean @default(false)
+  read    Boolean @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+}
+
+model ShopItem {
+  id            String         @id @default(uuid())
+  name          String
+  description   String
+  addedByUserId String
+  addedBy       User           @relation(fields: [addedByUserId], references: [id], onDelete: Cascade)
+  imageUrl      String
+  price         Int
+  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
+  stock         Int
+  category      String
+  available     Boolean        @default(true)
+  featured      Boolean        @default(false)
+  wishlists     ShopWishlist[]
+  shopPurchases ShopPurchase[]
+}
+
+model ShopWishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId    String
+  item      ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, itemId])
+}
+
+enum PurchaseStatus {
+  PENDING
+  FULFILLED
+  REJECTED
+}
+
+model ShopPurchase {
+  id        String         @id @default(uuid())
+  itemId    String
+  item      ShopItem       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  status    PurchaseStatus @default(PENDING)
+  userId    String
+  quantity  Int            @default(1)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime       @default(now()) @updatedAt @db.Timestamptz(3)
+}
+
+model ShopSuggestion {
+  id                  String               @id @default(uuid())
+  name                String
+  image               String
+  description         String
+  createdByUserId     String
+  pending             Boolean              @default(true)
+  createdBy           User                 @relation("ShopSuggestionCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  createdAt           DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime             @updatedAt @db.Timestamptz(3)
+  shopSuggestionVotes ShopSuggestionVote[]
+
+  @@index([createdByUserId])
+  @@index(pending)
+}
+
+enum ShopSuggestionVoteType {
+  UP
+  DOWN
+}
+
+model ShopSuggestionVote {
+  id           String                 @id @default(uuid())
+  suggestionId String
+  userId       String
+  type         ShopSuggestionVoteType
+  suggestion   ShopSuggestion         @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime               @updatedAt @db.Timestamptz(3)
+
+  @@unique([suggestionId, userId])
+  @@index([userId])
+}
+
+model Post {
+  id          String        @id @default(uuid())
+  authorId    String
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content     String        @default("")
+  flagged     Boolean       @default(false)
+  edited      Boolean       @default(false)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+  views       Int           @default(1)
+  repostOfId  String?
+  repostOf    Post?         @relation("PostReposts", fields: [repostOfId], references: [id], onDelete: Cascade)
+  reposts     Post[]        @relation("PostReposts")
+  likes       Like[]
+  comments    Comment[]
+  attachments Attachment[]
+  bookmarks   Bookmark[]
+  postViews   PostView[]
+  hashtags    PostHashtag[]
+  simulationPost SimulationPost?
+  simulationReportRewards SimulationReportReward[] @relation("SimulationRewardPost")
+
+  @@index([authorId])
+  @@index([repostOfId])
+  @@map("post")
+}
+
+model SimulationPost {
+  id              String   @id @default(cuid())
+  postId          String   @unique
+  scenario        String
+  groundTruth     String
+  category        String?
+  generationModel String
+  promptVersion   String
+  createdAt       DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@map("simulation_post")
+}
+
+model SimulationRun {
+  id          String    @id @default(cuid())
+  slotKey     String    @unique
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@map("simulation_run")
+}
+
+model SimulationReportReward {
+  id         String   @id @default(cuid())
+  postId     String
+  reporterId String
+  amount     Int
+  createdAt  DateTime @default(now())
+
+  post     Post @relation("SimulationRewardPost", fields: [postId], references: [id], onDelete: Cascade)
+  reporter User @relation("SimulationRewardReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, reporterId])
+  @@index([reporterId, createdAt])
+  @@map("simulation_report_reward")
+}
+
+model RngEntry {
+  id        String   @id @default(uuid())
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+  number    Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model PostHashtag {
+  postId String
+  tag    String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([postId, tag])
+  @@index([tag, createdAt])
+  @@map("post_hashtag")
+}
+
+model Bookmark {
+  userId String
+  postId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@map("bookmark")
+}
+
+model PostView {
+  userId String
+  postId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@map("post_view")
+}
+
+model Like {
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([userId, postId])
+  @@map("like")
+}
+
+model Comment {
+  id       String @id @default(uuid())
+  postId   String
+  authorId String
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  content String
+
+  flagged Boolean @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("comment")
+}
+
+model Attachment {
+  id     String @id @default(uuid())
+  postId String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  name String
+  url  String
+  type String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([postId])
+  @@map("attachment")
+}
+
+model Follow {
+  userId   String
+  followId String
+
+  user   User @relation("UserFollowing", fields: [userId], references: [id], onDelete: Cascade)
+  follow User @relation("UserFollowers", fields: [followId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([userId, followId])
+  @@map("follow")
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  actorId String?
+  actor   User?   @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  content String
+
+  read Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model Dm {
+  id         String @id @default(uuid())
+  senderId   String
+  receiverId String
+  message    String
+
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, senderId])
+  @@index([createdAt])
+}
+
+model CheckIn {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  wellbeing  Int
+  happiness  Int
+  stress     Int
+  sleep      Int
+  energy     Int
+  assistance Boolean
+
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model Session {
+  id        String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String
+  token     String   @unique
+  expiresAt DateTime @db.Timestamptz(3)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @db.Timestamptz(3)
+  updatedAt DateTime @db.Timestamptz(3)
+
+  impersonatedBy String?
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId                String
+
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @db.Timestamptz(3)
+  updatedAt             DateTime  @db.Timestamptz(3)
+
+  @@index([userId])
+  @@unique([providerId, accountId], map: "account_providerId_accountId_uidx")
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @db.Timestamptz(3)
+  updatedAt  DateTime @db.Timestamptz(3)
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Apikey {
+  id                  String    @id
+  configId            String    @default("default")
+  name                String?
+  start               String?
+  referenceId         String
+  prefix              String?
+  key                 String
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime?
+  enabled             Boolean?  @default(true)
+  rateLimitEnabled    Boolean?  @default(true)
+  rateLimitTimeWindow Int?      @default(86400000)
+  rateLimitMax        Int?      @default(10)
+  requestCount        Int?      @default(0)
+  remaining           Int?
+  lastRequest         DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime
+  updatedAt           DateTime
+  permissions         String?
+  metadata            String?
+
+  @@index([configId])
+  @@index([referenceId])
+  @@index([key])
+  @@map("apikey")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  auth      String
+  p256dh    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_subscription")
+}

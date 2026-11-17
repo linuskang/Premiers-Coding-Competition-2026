@@ -1,0 +1,283 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@media (min-width: 1024px) and (max-height: 720px) {
+    .short-screen-sidebar {
+        display: none !important;
+    }
+
+    .short-screen-mobile-nav {
+        display: flex !important;
+    }
+
+    .short-screen-feedback {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .quiz-page-center {
+        margin-left: 16rem;
+    }
+}
+
+@media (min-width: 1024px) and (max-height: 720px) {
+    .quiz-page-center {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    .sidebar-logo {
+        width: clamp(8rem, calc(40vh - 10rem), 12.5rem);
+        margin-top: clamp(0.5rem, calc(4.44vh - 1.5rem), 1rem);
+    }
+
+    .sidebar-nav {
+        gap: clamp(0rem, calc(2.22vh - 1rem), 0.25rem);
+        padding-inline: clamp(0.25rem, calc(2.22vh - 1rem), 0.5rem);
+    }
+
+    .sidebar-link {
+        gap: clamp(0.5rem, calc(2.22vh - 1rem), 0.75rem);
+        padding-block: clamp(0.25rem, calc(2.22vh - 1rem), 0.5rem);
+    }
+
+    .sidebar-link-active {
+        font-size: clamp(1.25rem, calc(2.22vh + 0.25rem), 1.5rem);
+    }
+
+    .sidebar-link:not(.sidebar-link-active) {
+        font-size: clamp(1rem, calc(2.22vh + 0rem), 1.25rem);
+    }
+
+    .sidebar-icon {
+        width: clamp(1.5rem, calc(2.22vh + 0rem), 1.75rem);
+        height: clamp(1.5rem, calc(2.22vh + 0rem), 1.75rem);
+    }
+
+    .sidebar-icon-active {
+        width: clamp(1.75rem, calc(2.22vh + 0.25rem), 2.25rem);
+        height: clamp(1.75rem, calc(2.22vh + 0.25rem), 2.25rem);
+    }
+
+    .sidebar-post-button {
+        height: clamp(2.25rem, calc(2.22vh + 1.25rem), 2.75rem);
+        margin-top: clamp(0.5rem, calc(2.22vh - 1rem), 1rem);
+    }
+}
+
+@media (min-width: 1024px) and (max-height: 900px) {
+    .sidebar-logo {
+        margin-left: 0;
+        margin-right: auto;
+    }
+}
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: var(--font-sans);
+    --font-playfair: var(--font-playfair), 'Playfair Display', serif;
+    --font-exo: var(--font-exo), 'Exo 2', sans-serif;
+    --font-times: 'Times New Roman', Times, serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-homepage-primary: var(--homepage-primary);
+    --color-homepage-input: var(--homepage-input);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-primary-2: var(--primary-2);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-card-header: var(--card-header);
+    --color-card-2: var(--card-2);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+    --color-card-primary: var(--card-primary);
+    --color-profile-card: var(--profile-card);
+
+    --color-purple-1: var(--purple-1);
+}
+
+:root {
+    --background: hsl(46, 28%, 94%);
+    --card-primary: hsl(0, 0%, 100%);
+    --profile-card: hsl(0, 0%, 100%);
+    --foreground: hsl(20, 14.3%, 4.1%);
+    --card: hsl(0, 0%, 100%);
+    --card-foreground: hsl(20, 14.3%, 4.1%);
+    --popover: hsl(0, 0%, 100%);
+    --popover-foreground: hsl(20, 14.3%, 4.1%);
+    --primary: hsl(22, 100%, 15%);
+    --primary-2: hsl(22, 100%, 15%);
+    --primary-foreground: hsl(60, 9.1%, 97.8%);
+    --secondary: hsl(42, 18%, 90%);
+    --secondary-foreground: hsl(24, 9.8%, 10%);
+    --muted: hsl(42, 18%, 90%);
+    --muted-foreground: hsl(25, 8%, 32%);
+    --accent: hsl(42, 18%, 90%);
+    --accent-foreground: hsl(24, 9.8%, 10%);
+    --destructive: hsl(0, 72.2%, 50.6%);
+    --border: hsl(35, 18%, 78%);
+    --input: hsl(35, 16%, 88%);
+    --ring: hsl(22, 100%, 15%);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.546 0.245 262.881);
+    --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+    --homepage-primary: hsl(285, 30%, 90%);
+    --homepage-input: hsl(285, 16%, 88%);
+}
+
+.dark {
+    --background: hsl(245, 56%, 8%);
+    --card-primary: hsl(245, 67%, 7%);
+    --foreground: hsl(0, 0%, 100%);
+
+    --profile-card: hsl(230, 16%, 45%);
+
+    --homepage-primary: hsl(285, 33, 5);
+    --homepage-input: hsl(290, 4, 30);
+
+    --card-header: hsl(231, 16%, 45%);
+    --card: hsl(231, 21%, 26%);
+    --card-2: hsl(36, 5%, 38%);
+
+    --card-foreground: hsl(0, 0%, 100%);
+    --popover: hsl(231, 16%, 45%);
+    --popover-foreground: hsl(0, 0%, 100%);
+    --primary: hsl(60, 9.1%, 97.8%);
+    --primary-2: hsl(49, 68%, 84%);
+    --primary-foreground: hsl(245, 67%, 7%);
+    --secondary: hsl(231, 21%, 26%);
+    --secondary-foreground: hsl(0, 0%, 100%);
+    --muted: hsl(36, 5%, 38%);
+    --muted-foreground: hsl(245, 5%, 80%);
+    --accent: hsl(288, 100%, 86%);
+    --accent-foreground: hsl(245, 67%, 7%);
+    --destructive: hsl(352, 100%, 78%);
+    --border: hsl(228, 18%, 45%);
+    --input: hsl(231, 21%, 26%);
+    --ring: hsl(49, 68%, 84%);
+    --chart-1: hsl(180, 100%, 75%);
+    --chart-2: hsl(288, 100%, 86%);
+    --chart-3: hsl(198, 100%, 79%);
+    --chart-4: hsl(49, 100%, 70%);
+    --chart-5: hsl(31, 100%, 80%);
+    --sidebar: hsl(231, 21%, 26%);
+    --sidebar-foreground: hsl(0, 0%, 100%);
+    --sidebar-primary: hsl(288, 100%, 86%);
+    --sidebar-primary-foreground: hsl(245, 67%, 7%);
+    --sidebar-accent: hsl(228, 18%, 45%);
+    --sidebar-accent-foreground: hsl(0, 0%, 100%);
+    --sidebar-border: hsl(228, 18%, 45%);
+    --sidebar-ring: hsl(49, 68%, 84%);
+
+    --purple-1: hsl(288, 100%, 86%);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
+
+    html {
+        @apply font-sans;
+    }
+}
+
+.goose-wallpaper::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        url("/goose/Sleeping%201.png"),
+        url("/goose/Music%20Dancing%201.png"),
+        url("/goose/V%20Formation%201.png"),
+        url("/goose/Book.png"),
+        url("/goose/Hearts.png"),
+        url("/goose/Laptop.png"),
+        url("/goose/Celebration.png"),
+        url("/goose/Knitting.png"),
+        url("/goose/Backpack.png");
+    background-repeat: no-repeat;
+    background-position:
+        left 17rem bottom 3rem,
+        right 3rem top 5rem,
+        right 14rem bottom 6rem,
+        left 2rem top 3rem,
+        left 19rem top 38%,
+        right 17rem top 45%,
+        left 2rem bottom 2rem,
+        calc(50% - 23rem) 18%,
+        calc(50% + 23rem) 68%;
+    background-size:
+        13rem auto,
+        11rem auto,
+        14rem auto,
+        9rem auto,
+        10rem auto,
+        10rem auto,
+        9rem auto,
+        8rem auto,
+        8rem auto;
+    opacity: 0;
+}
+
+.dark .goose-wallpaper::before {
+    opacity: 0.025;
+}

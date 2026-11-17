@@ -1,0 +1,77 @@
+//   ______                                 __
+//  /      \                               /  |
+// /$$$$$$  | __    __   ______    _______ $$ |   __  __    __
+// $$ |  $$ |/  |  /  | /      \  /       |$$ |  /  |/  |  /  |
+// $$ |  $$ |$$ |  $$ | $$$$$$  |/$$$$$$$/ $$ |_/$$/ $$ |  $$ |
+// $$ |_ $$ |$$ |  $$ | /    $$ |$$ |      $$   $$<  $$ |  $$ |
+// $$ / \$$ |$$ \__$$ |/$$$$$$$ |$$ \_____ $$$$$$  \ $$ \__$$ |
+// $$ $$ $$< $$    $$/ $$    $$ |$$       |$$ | $$  |$$    $$ |
+//  $$$$$$  | $$$$$$/   $$$$$$$/  $$$$$$$/ $$/   $$/  $$$$$$$ |
+//      $$$/                                         /  \__$$ |
+//                                                   $$    $$/
+//                                                    $$$$$$/
+//
+// Linus Kang, 2026
+// Work is licensed under the CC BY-NC 4.0 license.
+
+import { createEnv } from "@t3-oss/env-nextjs"
+import * as z from "zod"
+import "dotenv/config"
+
+const envBoolean = z.preprocess(
+    (value) => {
+        if (value === "true") return true
+        if (value === "false") return false
+        return value
+    },
+    z.boolean().default(false)
+)
+
+export const env = createEnv({
+    server: {
+        DATABASE_URL: z.string(),
+        ORG_NAME: z.string(),
+        GITHUB_CLIENT_ID: z.string(),
+        GITHUB_CLIENT_SECRET: z.string(),
+        GOOGLE_CLIENT_ID: z.string(),
+        GOOGLE_CLIENT_SECRET: z.string(),
+        MICROSOFT_CLIENT_ID: z.string(),
+        MICROSOFT_CLIENT_SECRET: z.string(),
+        UPSTREAM_API_KEY: z.string(),
+        RESEND_API_KEY: z.string(),
+        EMAIL_FROM: z.string(),
+        BETTER_AUTH_URL: z.string(),
+        DESCRIPTION: z.string(),
+        AI_URL: z.string(),
+        AI_KEY: z.string(),
+        AI_MODEL: z.string(),
+        BOT_AI_MODEL: z.string().default("gpt-4o-mini"),
+        SIMULATION_POSTING_ENABLED: envBoolean,
+        SIMULATION_SCHEDULER_SECRET: z.string().default(""),
+        SIMULATION_REWARD_POINTS: z.coerce.number().int().min(0).default(10),
+        RUSTFS_ENDPOINT: z.url(),
+        RUSTFS_REGION: z.string().default("auto"),
+        RUSTFS_ACCESS_KEY_ID: z.string(),
+        RUSTFS_SECRET_ACCESS_KEY: z.string(),
+        RUSTFS_BUCKET: z.string().default("qky"),
+        RUSTFS_PUBLIC_BASE_URL: z.url().default("https://cdn.linus.my/qky"),
+        LOGIN_BANNER_MESSAGE: z.string().default(""),
+        QOTD: z.string().default(""),
+        VAPID_EMAIL: z.string(),
+        VAPID_PRIVATE_KEY: z.string(),
+        SEQ_INGEST_URL: z.string(),
+        SEQ_API_KEY: z.string(),
+    },
+
+    client: {
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string(),
+    },
+
+    // next >16
+    experimental__runtimeEnv: {
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    },
+    emptyStringAsUndefined: true,
+    skipValidation:
+        !!process.env.CI || process.env.SKIP_ENV_VALIDATION === "true",
+})

@@ -1,0 +1,74 @@
+//   ______                                 __
+//  /      \                               /  |
+// /$$$$$$  | __    __   ______    _______ $$ |   __  __    __
+// $$ |  $$ |/  |  /  | /      \  /       |$$ |  /  |/  |  /  |
+// $$ |  $$ |$$ |  $$ | $$$$$$  |/$$$$$$$/ $$ |_/$$/ $$ |  $$ |
+// $$ |_ $$ |$$ |  $$ | /    $$ |$$ |      $$   $$<  $$ |  $$ |
+// $$ / \$$ |$$ \__$$ |/$$$$$$$ |$$ \_____ $$$$$$  \ $$ \__$$ |
+// $$ $$ $$< $$    $$/ $$    $$ |$$       |$$ | $$  |$$    $$ |
+//  $$$$$$  | $$$$$$/   $$$$$$$/  $$$$$$$/ $$/   $$/  $$$$$$$ |
+//      $$$/                                         /  \__$$ |
+//                                                   $$    $$/
+//                                                    $$$$$$/
+//
+// Linus Kang, 2026
+// Work is licensed under the CC BY-NC 4.0 license.
+
+import type { NextConfig } from "next"
+import { withBotId } from 'botid/next/config'
+
+const nextConfig: NextConfig = {
+    output: "standalone",
+    serverExternalPackages: ["pino"],
+    transpilePackages: ["@uplabs/sdk"],
+    images: {
+        dangerouslyAllowLocalIP: true,
+        dangerouslyAllowSVG: true,
+        contentDispositionType: "attachment",
+        contentSecurityPolicy:
+            "default-src 'self'; script-src 'none'; sandbox;",
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "cdn.linus.my",
+                pathname: "/qky/**",
+            },
+            {
+                protocol: "https",
+                hostname: "lh3.googleusercontent.com",
+                pathname: "/**",
+            },
+            {
+                protocol: "https",
+                hostname: "quacky.space",
+                pathname: "/**",
+            },
+            {
+                protocol: "https",
+                hostname: "avatars.githubusercontent.com",
+                pathname: "/u/**",
+            },
+            {
+                protocol: "https",
+                hostname: "avatar.linus.my",
+                pathname: "/10.x/**",
+            },
+            {
+                protocol: "https",
+                hostname: "github.com",
+                pathname: "**",
+            },
+        ],
+    },
+    async rewrites() {
+        return [
+            {
+                source: "/@:handle",
+                destination: "/user/:handle",
+            },
+        ]
+    },
+    allowedDevOrigins: ["qky.linus.my"],
+}
+
+export default withBotId(nextConfig)

@@ -1,0 +1,318 @@
+//   ______                                 __
+//  /      \                               /  |
+// /$$$$$$  | __    __   ______    _______ $$ |   __  __    __
+// $$ |  $$ |/  |  /  | /      \  /       |$$ |  /  |/  |  /  |
+// $$ |  $$ |$$ |  $$ | $$$$$$  |/$$$$$$$/ $$ |_/$$/ $$ |  $$ |
+// $$ |_ $$ |$$ |  $$ | /    $$ |$$ |      $$   $$<  $$ |  $$ |
+// $$ / \$$ |$$ \__$$ |/$$$$$$$ |$$ \_____ $$$$$$  \ $$ \__$$ |
+// $$ $$ $$< $$    $$/ $$    $$ |$$       |$$ | $$  |$$    $$ |
+//  $$$$$$  | $$$$$$/   $$$$$$$/  $$$$$$$/ $$/   $$/  $$$$$$$ |
+//      $$$/                                         /  \__$$ |
+//                                                   $$    $$/
+//                                                    $$$$$$/
+//
+// Linus Kang, 2026
+// Work is licensed under the CC BY-NC 4.0 license.
+
+import "server-only"
+
+import { prisma } from "@/server/prisma"
+
+function withoutSimulationMetadata<
+    T extends {
+        isSimulationAccount: boolean
+        simulationActive: boolean
+        simulationPersona: unknown
+    },
+>(user: T) {
+    const {
+        isSimulationAccount,
+        simulationActive,
+        simulationPersona,
+        ...safeUser
+    } = user
+
+    void isSimulationAccount
+    void simulationActive
+    void simulationPersona
+
+    return safeUser
+}
+
+export async function getUser(handle: string) {
+    const user = await prisma.user.findUnique({
+        where: {
+            username: handle,
+        },
+        include: {
+            following: {
+                select: {
+                    follow: {
+                        select: {
+                            username: true,
+                        },
+                    },
+                },
+            },
+            followers: {
+                select: {
+                    user: {
+                        select: {
+                            username: true,
+                        },
+                    },
+                },
+            },
+        },
+    })
+
+    if (!user) {
+        return null
+    }
+
+    const following = user.following.map(({ follow }) => follow.username)
+    const followers = user.followers.map(({ user }) => user.username)
+
+    return {
+        ...withoutSimulationMetadata(user),
+        following,
+        followers,
+    }
+}
+
+export async function getUserById(id: string) {
+    const user = await prisma.user.findUnique({
+        where: {
+            id,
+        },
+        include: {
+            following: {
+                select: {
+                    follow: {
+                        select: {
+                            username: true,
+                        },
+                    },
+                },
+            },
+            followers: {
+                select: {
+                    user: {
+                        select: {
+                            username: true,
+                        },
+                    },
+                },
+            },
+        },
+    })
+
+    if (!user) {
+        return null
+    }
+
+    const following = user.following.map(({ follow }) => follow.username)
+    const followers = user.followers.map(({ user }) => user.username)
+
+    return {
+        ...withoutSimulationMetadata(user),
+        following,
+        followers,
+    }
+}
+
+export async function getUsers() {
+    const users = await prisma.user.findMany()
+
+    return users;
+}
+
+export async function addXP(handle: string, increase: number) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    const xp = user.xp + increase
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            xp,
+        },
+    })
+
+    return true
+}
+
+export async function addPoints(handle: string, increase: number) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    const points = user.points + increase
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+
+        data: {
+            points,
+        },
+    })
+
+    return true
+}
+
+export async function removePoints(handle: string, decrease: number) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    let points = user.points - decrease
+
+    if (points < 0) {
+        points = 0
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            points,
+        },
+    })
+
+    return true
+}
+
+export async function removeXP(handle: string, decrease: number) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    let xp = user.xp - decrease
+
+    if (xp < 0) {
+        xp = 0
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            xp,
+        },
+    })
+
+    return true
+}
+
+export async function unlockPosting(handle: string) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            unlockedPosting: true,
+        },
+    })
+
+    console.log(`Unlocked posting for ${handle}`)
+
+    return true
+}
+
+export async function unlockCommenting(handle: string) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            unlockedCommenting: true,
+        },
+    })
+
+    return true
+}
+
+export async function unlockDms(handle: string) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            unlockedDms: true,
+        },
+    })
+
+    return true
+}
+
+export async function unlockFuzzies(handle: string) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            unlockedFuzzies: true,
+        },
+    })
+
+    return true
+}
+
+export async function unlockProfiles(handle: string) {
+    const user = await getUser(handle)
+
+    if (!user) {
+        return null
+    }
+
+    await prisma.user.update({
+        where: {
+            username: handle,
+        },
+        data: {
+            unlockedProfiles: true,
+        },
+    })
+
+    return true
+}
